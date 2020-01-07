@@ -1,0 +1,73 @@
+% Problem 4
+% Differential Eqn: x'' = rx
+
+close all 
+clear all
+format rat
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+partC_D_plot(1,1,-1)
+
+partC_D_plot(1,1,0)
+
+partC_D_plot(-1,1,1)
+
+%%%%%%%%%%%% part c and d
+function partC_D_plot(r, a, b)
+    h=1/32;
+    n=1000;
+
+
+    w1(1)=a; 
+    w1(2)= w1(1) + h*b; % FE approx for CE using initial conditions
+
+    for i=1:n
+        w1(i+2) = h^2*r*w1(i+1) + 2*w1(i+1) - w1(i);
+    end
+    
+    %%%%%%%%%%%%%%%%%%%%%%%%%
+    
+    w(1)=a;
+    u(1)=b;
+    t(1)=0; 
+
+    % approximate first two points with FE
+    w(2) = w(1) + u(1)*h;
+    u(2) = u(1) + r*w(1)*h;
+    t(2)=h;
+
+    % implements CE using auxiliary variable
+    for i=1:n
+        w(i+2) = w(i) + u(i+1)*2*h;
+        u(i+2) = u(i) + r*w(i+1)*2*h;
+        t(i+2) = i*h;
+    end
+
+    % creates exact solution to DE depending on value of r
+    if r>0
+        f = @(x) 1/2*(a+b/sqrt(r))*exp(sqrt(r)*x) + 1/2*(a-b/sqrt(r))*exp(-sqrt(r)*x); 
+    elseif r<0
+        f = @(x) a*cos(sqrt(-r)*x) + b/sqrt(-r)*sin(sqrt(-r)*x); % swap sign r => -r
+    elseif r==0
+        f = @(x) b*x + a;
+    end
+
+    figure 
+    plot(t, w1, 'k.') % Centered difference
+    hold on
+    plot(t, w, 'r.') % auxiliary variable method
+    fplot(f, 'b')
+    xlim([0,2])
+    legend('CE difference', 'CE auxiliary', 'Exact')
+    title("x'' = rx; r="+ r +", a="+ a +", b=" + b + ", h="+h)
+    
+    figure
+    plot(t, abs((f(t)-w1)./f(t)), 'k.', t, abs((f(t)-w)./f(t)), 'r.')
+    xlim([0,2])
+    legend('CE difference', 'CE auxiliary')
+    title("relative error, r="+ r +", a="+ a +", b=" + b + ", h="+h)    
+    
+end
+
+
+
